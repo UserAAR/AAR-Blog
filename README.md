@@ -5,6 +5,12 @@ The goal is to keep writing ergonomics in Notion, while serving a fast, fully st
 
 [**🖥️ Live Site**](https://log.aars.works)
 
+
+<p align="center">
+  <img src="public/site-preview.png" alt="DevAAR site preview" width="900"/>
+</p>
+
+
 ---
 
 ## Overview
