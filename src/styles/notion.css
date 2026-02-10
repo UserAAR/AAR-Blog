@@ -14,10 +14,15 @@
 
 .custom-md .notion-code-block pre {
 	@apply bg-[var(--codeblock-bg)] p-4 overflow-x-auto;
+	@apply text-sm leading-relaxed text-neutral-50 dark:text-neutral-100;
 }
 
 .custom-md .notion-code-block code {
-	@apply text-sm font-mono leading-relaxed;
+	@apply font-mono;
+	background-color: transparent;
+	border-radius: 0;
+	padding: 0;
+	box-shadow: none;
 }
 
 .custom-md .notion-code-block .code-caption {
