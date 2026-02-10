@@ -1,0 +1,138 @@
+---
+import License from "@components/misc/License.astro";
+import Markdown from "@components/misc/Markdown.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { fetchPageBlocks, fetchPageReadingStats } from "@/lib/notion";
+import { renderNotionBlocks } from "@/lib/notion-renderer";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
+import { licenseConfig, profileConfig, siteConfig } from "../../config";
+import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+import PostMetadata from "../../components/PostMeta.astro";
+
+export async function getStaticPaths() {
+	const blogEntries = await getSortedPosts();
+	return blogEntries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+
+// Fetch Notion blocks and render to HTML (cached)
+const blocks = await fetchPageBlocks(entry.id);
+const { html: contentHtml, headings } = renderNotionBlocks(blocks);
+
+// Calculate word count and reading time from actual block content (cached)
+const { words, minutes } = await fetchPageReadingStats(entry.id);
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: entry.title,
+	description: entry.summary || entry.title,
+	keywords: entry.tags,
+	author: {
+		"@type": "Person",
+		name: entry.author || profileConfig.name,
+		url: Astro.site,
+	},
+	datePublished: formatDateToYYYYMMDD(entry.date),
+	dateModified: formatDateToYYYYMMDD(entry.updatedAt),
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+<MainGridLayout banner={entry.thumbnail} title={entry.title} description={entry.summary} setOGTypeArticle={true} headings={headings}>
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+        <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
+            {}
+        ]}>
+            <!-- word count and reading time -->
+            <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
+                <div class="flex flex-row items-center">
+                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+                        <Icon name="material-symbols:notes-rounded"></Icon>
+                    </div>
+                    <div class="text-sm">{words} {" " + i18n(I18nKey.wordsCount)}</div>
+                </div>
+                <div class="flex flex-row items-center">
+                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+                        <Icon name="material-symbols:schedule-outline-rounded"></Icon>
+                    </div>
+                    <div class="text-sm">
+                        {minutes} {" " + i18n(minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
+                    </div>
+                </div>
+            </div>
+
+            <!-- title -->
+            <div class="relative onload-animation">
+                <div
+                    data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
+                    class="transition w-full block font-bold mb-3
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                    md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
+                    before:absolute before:top-[0.75rem] before:left-[-1.125rem]
+                ">
+                    {entry.title}
+                </div>
+            </div>
+
+            <!-- metadata -->
+            <div class="onload-animation">
+                <PostMetadata
+                        class="mb-5"
+                        published={entry.date}
+                        updated={entry.updatedAt}
+                        tags={entry.tags}
+                        category={entry.category}
+                ></PostMetadata>
+                {!entry.thumbnail && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
+            </div>
+
+            <!-- cover image -->
+            {entry.thumbnail &&
+                <div class="mb-8 rounded-xl banner-container onload-animation overflow-hidden relative">
+                    <div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>
+                    <img src={entry.thumbnail} alt={`Cover image for ${entry.title}`} class="w-full h-full object-cover" loading="lazy"/>
+                </div>
+            }
+
+            <Markdown class="mb-6 markdown-content onload-animation">
+                <Fragment set:html={contentHtml} />
+            </Markdown>
+
+            {licenseConfig.enable && <License title={entry.title} slug={entry.slug} pubDate={entry.date} author={entry.author} class="mb-6 rounded-xl license-container onload-animation"></License>}
+
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
+        <a href={entry.nextSlug ? getPostUrlBySlug(entry.nextSlug) : "#"}
+           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !entry.nextSlug}]}>
+            {entry.nextSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-start gap-4" >
+                <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
+                <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
+                    {entry.nextTitle}
+                </div>
+            </div>}
+        </a>
+
+        <a href={entry.prevSlug ? getPostUrlBySlug(entry.prevSlug) : "#"}
+           class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !entry.prevSlug}]}>
+            {entry.prevSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-end gap-4">
+                <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
+                    {entry.prevTitle}
+                </div>
+                <Icon name="material-symbols:chevron-right-rounded" class="text-[2rem] text-[var(--primary)]" />
+            </div>}
+        </a>
+    </div>
+
+</MainGridLayout>

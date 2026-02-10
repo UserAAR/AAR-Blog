@@ -1,0 +1,35 @@
+---
+import type { NotionPost } from "@/lib/notion";
+import { fetchReadingStatsForPosts } from "@/lib/notion";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import PostCard from "./PostCard.astro";
+
+const { page } = Astro.props;
+
+let delay = 0;
+const interval = 50;
+
+const posts = page.data as NotionPost[];
+const statsMap = await fetchReadingStatsForPosts(posts, 4);
+---
+<div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+    {posts.map((entry: NotionPost) => {
+        const stats = statsMap.get(entry.id) ?? { words: 0, minutes: 0 };
+        return (
+        <PostCard
+                title={entry.title}
+                tags={entry.tags}
+                category={entry.category}
+                published={entry.date}
+                updated={entry.updatedAt}
+                url={getPostUrlBySlug(entry.slug)}
+                image={entry.thumbnail}
+                description={entry.summary}
+                words={stats.words}
+                minutes={stats.minutes}
+                class:list="onload-animation"
+                style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+        ></PostCard>
+        );
+    })}
+</div>

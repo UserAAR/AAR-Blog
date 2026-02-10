@@ -1,0 +1,60 @@
+---
+import PostCard from "@components/PostCard.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
+
+export async function getStaticPaths() {
+	const allPosts = await getSortedPosts();
+
+	// Get unique tags
+	const tagSet = new Set<string>();
+	for (const post of allPosts) {
+		for (const tag of post.tags) {
+			tagSet.add(tag);
+		}
+	}
+
+	return [...tagSet].map((tag) => {
+		const filtered = allPosts.filter((p) => p.tags.includes(tag));
+		return {
+			params: { tag },
+			props: { posts: filtered, tag },
+		};
+	});
+}
+
+const { posts, tag } = Astro.props;
+
+let delay = 0;
+const interval = 50;
+---
+
+<MainGridLayout title={`Tag: ${tag}`}>
+	<div class="mb-4 onload-animation">
+		<div class="card-base px-6 py-4">
+			<h1 class="text-2xl font-bold text-90">
+				<span class="text-50">Tag:</span> #{tag}
+			</h1>
+			<p class="text-sm text-50 mt-1">{posts.length} posts</p>
+		</div>
+	</div>
+	<div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+		{posts.map((entry: any) => (
+			<PostCard
+				title={entry.title}
+				tags={entry.tags}
+				category={entry.category}
+				published={entry.date}
+				updated={entry.updatedAt}
+				url={getPostUrlBySlug(entry.slug)}
+				image={entry.thumbnail}
+				description={entry.summary}
+				words={entry.words}
+				minutes={entry.minutes}
+				class:list="onload-animation"
+				style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+			></PostCard>
+		))}
+	</div>
+</MainGridLayout>
