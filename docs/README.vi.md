@@ -2,7 +2,7 @@
 
 Một mẫu blog tĩnh được xây bằng [Astro](https://astro.build).
 
-[**🖥️ Xem bản dùng thử (Vercel)**](https://fuwari.vercel.app)
+[**🖥️ Xem bản dùng thử (Vercel)**](https://log.aars.works)
 
 ![Hình ảnh xem trước](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 
@@ -55,9 +55,9 @@ lang: jp      # Chỉ đặt nếu ngôn ngữ của bài viết khác với ng�
 
 Ngoài việc Astro đã có hỗ trợ mặc định cho [Markdown vị Github](https://github.github.com/gfm/), một số tính năng Markdown khác cũng đã được bổ sung:
 
-- Chêm xen ([Xem trước và Cách sử dụng](https://fuwari.vercel.app/posts/markdown-extended/#admonitions))
-- Thẻ hiển thị kho lưu trữ GitHub ([Xem trước và Cách sử dụng](https://fuwari.vercel.app/posts/markdown-extended/#github-repository-cards))
-- Các khối mã nâng cao với Expressive Code ([Xem trước](https://fuwari.vercel.app/posts/expressive-code/) / [Tài liệu](https://expressive-code.com/))
+- Chêm xen ([Xem trước và Cách sử dụng](https://log.aars.works/posts/markdown-extended/#admonitions))
+- Thẻ hiển thị kho lưu trữ GitHub ([Xem trước và Cách sử dụng](https://log.aars.works/posts/markdown-extended/#github-repository-cards))
+- Các khối mã nâng cao với Expressive Code ([Xem trước](https://log.aars.works/posts/expressive-code/) / [Tài liệu](https://expressive-code.com/))
 
 ## ⚡ Lệnh
 

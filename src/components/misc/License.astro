@@ -13,19 +13,68 @@ interface Props {
 	class: string;
 }
 
-const { title, pubDate, author } = Astro.props;
+const { title, slug, pubDate, author } = Astro.props;
 const className = Astro.props.class;
 const licenseConf = licenseConfig;
-const postUrl = decodeURIComponent(Astro.url.toString());
+const canonicalUrl = `https://log.aars.works/blog/${slug}/`;
 const authorName = (author && author.trim() !== "" ? author : profileConfig.name);
 ---
 <div class={`relative transition overflow-hidden bg-[var(--license-block-bg)] py-5 px-6 ${className}`}>
     <div class="transition font-bold text-black/75 dark:text-white/75">
         {title}
     </div>
-    <a href={postUrl} class="link text-[var(--primary)]">
-        {postUrl}
-    </a>
+    <div class="mt-1 flex flex-wrap items-center gap-2">
+        <button
+            id={`copy-link-${slug}`}
+            type="button"
+            class="btn-regular rounded-lg h-9 px-3 text-sm font-bold active:scale-95 flex items-center gap-2"
+            data-url={canonicalUrl}
+        >
+            <Icon name="fa6-regular:copy" class="text-[1.1rem]"></Icon>
+            Copy link
+        </button>
+
+        <button
+            id={`share-${slug}`}
+            type="button"
+            class="btn-regular rounded-lg h-9 px-3 text-sm font-bold active:scale-95 flex items-center gap-2"
+            data-url={canonicalUrl}
+            data-title={title}
+        >
+            <Icon name="fa6-solid:share-nodes" class="text-[1.1rem]"></Icon>
+            Share
+        </button>
+
+        <a
+            aria-label="Share on X"
+            class="btn-regular rounded-lg h-9 w-9 active:scale-95 flex items-center justify-center"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(canonicalUrl)}&text=${encodeURIComponent(title)}`}
+        >
+            <Icon name="fa6-brands:twitter" class="text-[1.1rem]"></Icon>
+        </a>
+
+        <a
+            aria-label="Share on WhatsApp"
+            class="btn-regular rounded-lg h-9 w-9 active:scale-95 flex items-center justify-center"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://wa.me/?text=${encodeURIComponent(`${title} ${canonicalUrl}`)}`}
+        >
+            <Icon name="fa6-brands:whatsapp" class="text-[1.1rem]"></Icon>
+        </a>
+
+        <a
+            aria-label="Share on LinkedIn"
+            class="btn-regular rounded-lg h-9 w-9 active:scale-95 flex items-center justify-center"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`}
+        >
+            <Icon name="fa6-brands:linkedin" class="text-[1.1rem]"></Icon>
+        </a>
+    </div>
     <div class="flex gap-6 mt-2">
         <div>
             <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.author)}</div>
@@ -42,3 +91,54 @@ const authorName = (author && author.trim() !== "" ? author : profileConfig.name
     </div>
     <Icon name="fa6-brands:creative-commons" class="transition text-[15rem] absolute pointer-events-none right-6 top-1/2 -translate-y-1/2 text-black/5 dark:text-white/5"></Icon>
 </div>
+
+<script is:inline>
+  (function () {
+    const copyBtn = document.getElementById("copy-link-" + {JSON.stringify(slug)});
+    const shareBtn = document.getElementById("share-" + {JSON.stringify(slug)});
+
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function flashLabel(el, label, ms = 1200) {
+      if (!el) return;
+      const original = el.textContent;
+      el.textContent = label;
+      window.setTimeout(() => {
+        el.textContent = original;
+      }, ms);
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener("click", async () => {
+        const url = copyBtn.getAttribute("data-url") || window.location.href;
+        const ok = await copyToClipboard(url);
+        flashLabel(copyBtn, ok ? "Copied" : "Copy failed");
+      });
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener("click", async () => {
+        const url = shareBtn.getAttribute("data-url") || window.location.href;
+        const title = shareBtn.getAttribute("data-title") || document.title;
+        // Prefer Web Share API when available
+        if (navigator.share) {
+          try {
+            await navigator.share({ title, url });
+            return;
+          } catch {
+            // ignore (user cancelled or share failed)
+          }
+        }
+        const ok = await copyToClipboard(url);
+        flashLabel(shareBtn, ok ? "Link copied" : "Share unsupported");
+      });
+    }
+  })();
+</script>

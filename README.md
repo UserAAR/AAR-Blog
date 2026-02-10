@@ -6,7 +6,7 @@
 
 A static blog template built with [Astro](https://astro.build).
 
-[**🖥️ Live Demo (Vercel)**](https://fuwari.vercel.app)
+[**🖥️ Live Demo (Vercel)**](https://log.aars.works)
 
 ![Preview Image](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 
@@ -68,9 +68,9 @@ lang: jp      # Set only if the post's language differs from the site's language
 
 In addition to Astro's default support for [GitHub Flavored Markdown](https://github.github.com/gfm/), several extra Markdown features are included:
 
-- Admonitions ([Preview and Usage](https://fuwari.vercel.app/posts/markdown-extended/#admonitions))
-- GitHub repository cards ([Preview and Usage](https://fuwari.vercel.app/posts/markdown-extended/#github-repository-cards))
-- Enhanced code blocks with Expressive Code ([Preview](https://fuwari.vercel.app/posts/expressive-code/) / [Docs](https://expressive-code.com/))
+- Admonitions ([Preview and Usage](https://log.aars.works/posts/markdown-extended/#admonitions))
+- GitHub repository cards ([Preview and Usage](https://log.aars.works/posts/markdown-extended/#github-repository-cards))
+- Enhanced code blocks with Expressive Code ([Preview](https://log.aars.works/posts/expressive-code/) / [Docs](https://expressive-code.com/))
 
 ## ⚡ Commands
 
