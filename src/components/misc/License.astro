@@ -25,9 +25,9 @@ const authorName = (author && author.trim() !== "" ? author : profileConfig.name
     </div>
     <div class="mt-1 flex flex-wrap items-center gap-2">
         <button
-            id={`copy-link-${slug}`}
             type="button"
             class="btn-regular rounded-lg h-9 px-3 text-sm font-bold active:scale-95 flex items-center gap-2"
+            data-share-action="copy"
             data-url={canonicalUrl}
         >
             <Icon name="fa6-regular:copy" class="text-[1.1rem]"></Icon>
@@ -35,9 +35,9 @@ const authorName = (author && author.trim() !== "" ? author : profileConfig.name
         </button>
 
         <button
-            id={`share-${slug}`}
             type="button"
             class="btn-regular rounded-lg h-9 px-3 text-sm font-bold active:scale-95 flex items-center gap-2"
+            data-share-action="native"
             data-url={canonicalUrl}
             data-title={title}
         >
@@ -91,54 +91,3 @@ const authorName = (author && author.trim() !== "" ? author : profileConfig.name
     </div>
     <Icon name="fa6-brands:creative-commons" class="transition text-[15rem] absolute pointer-events-none right-6 top-1/2 -translate-y-1/2 text-black/5 dark:text-white/5"></Icon>
 </div>
-
-<script is:inline>
-  (function () {
-    const copyBtn = document.getElementById("copy-link-" + {JSON.stringify(slug)});
-    const shareBtn = document.getElementById("share-" + {JSON.stringify(slug)});
-
-    async function copyToClipboard(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-
-    function flashLabel(el, label, ms = 1200) {
-      if (!el) return;
-      const original = el.textContent;
-      el.textContent = label;
-      window.setTimeout(() => {
-        el.textContent = original;
-      }, ms);
-    }
-
-    if (copyBtn) {
-      copyBtn.addEventListener("click", async () => {
-        const url = copyBtn.getAttribute("data-url") || window.location.href;
-        const ok = await copyToClipboard(url);
-        flashLabel(copyBtn, ok ? "Copied" : "Copy failed");
-      });
-    }
-
-    if (shareBtn) {
-      shareBtn.addEventListener("click", async () => {
-        const url = shareBtn.getAttribute("data-url") || window.location.href;
-        const title = shareBtn.getAttribute("data-title") || document.title;
-        // Prefer Web Share API when available
-        if (navigator.share) {
-          try {
-            await navigator.share({ title, url });
-            return;
-          } catch {
-            // ignore (user cancelled or share failed)
-          }
-        }
-        const ok = await copyToClipboard(url);
-        flashLabel(shareBtn, ok ? "Link copied" : "Share unsupported");
-      });
-    }
-  })();
-</script>

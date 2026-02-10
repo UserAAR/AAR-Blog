@@ -371,8 +371,61 @@ function init() {
 	showBanner();
 }
 
+function initShareButtons() {
+	if (window.__aarShareInit) return;
+	window.__aarShareInit = true;
+
+	async function copyToClipboard(text) {
+		if (!navigator.clipboard || !navigator.clipboard.writeText) {
+			return false;
+		}
+		try {
+			await navigator.clipboard.writeText(text);
+			return true;
+		} catch (_e) {
+			return false;
+		}
+	}
+
+	function flashLabel(el, label, ms = 1200) {
+		if (!el) return;
+		const original = el.textContent;
+		el.textContent = label;
+		window.setTimeout(() => {
+			el.textContent = original;
+		}, ms);
+	}
+
+	document.addEventListener("click", async (event) => {
+		const target = event.target;
+		if (!(target instanceof HTMLElement)) return;
+		const btn = target.closest("[data-share-action]");
+		if (!btn) return;
+
+		const action = btn.getAttribute("data-share-action");
+		const url = btn.getAttribute("data-url") || window.location.href;
+		const title = btn.getAttribute("data-title") || document.title;
+
+		if (action === "copy") {
+			const ok = await copyToClipboard(url);
+			flashLabel(btn, ok ? "Copied!" : "Failed");
+		} else if (action === "native") {
+			if (!navigator.share) {
+				// No Web Share support → do nothing, fail silently
+				return;
+			}
+			try {
+				await navigator.share({ title, url });
+			} catch (_e) {
+				// user cancelled or share failed → ignore
+			}
+		}
+	});
+}
+
 /* Load settings when entering the site */
 init();
+initShareButtons();
 
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
